@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<info>
+	<infoitem key="UD_MostrarMarcas" value="name:ID_MARCA;datatype:string" />
+	<infoitem key="UD_MostrarTiendas" value="name:ID_TIENDA;datatype:int,name:NOMBRE_TIENDA;datatype:string,name:DIRECCION_URL;datatype:blob" />
+</info>

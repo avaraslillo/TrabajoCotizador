@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<info>
+	<infoitem key="UD_BuscarAvanzada" value="name:MODELO;datatype:string,name:RUTA_IMAGEN;datatype:blob,name:ID_MOVIL;datatype:int" />
+</info>

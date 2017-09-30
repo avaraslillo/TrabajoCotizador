@@ -1,0 +1,80 @@
+#menu ul li.nivel1 {
+display: block;
+text-decoration: none;
+color: #FFF;
+background-color: #5F75B1;
+border: solid 1px #fff;
+border-radius:6px 6px 6px 6px; 
+padding: 12px;
+position: relative;
+top:30px;	 
+width: 150px;
+font:Arial, Helvetica, sans-serif;
+font-size:14px;
+}
+#menu ul li.primera { border-top: solid 1px #FFF;
+}
+
+#menu ul li.admin{
+	display:block;
+	width:190px;
+	background-color:#5F75B1;
+	font-size:12px;
+	color:#FFF;
+	padding:15px;
+	position: relative;	
+	top:30px;	
+	border: solid 1px #fff;
+	border-radius:6px 6px 6px 6px;  	
+	font:Arial, Helvetica, sans-serif;
+	font-size:16px;
+	}
+		
+
+#menu ul li:hover {
+	position: relative;
+	background-color: #6FCDEC;
+	color: #FFF;
+}
+
+#menu ul li.admin>a{
+text-decoration:none; 
+color:#FFF;
+}
+
+#menu ul li.admin>a.hover{
+	color:#000;
+}
+
+#menu ul li opcion:hover, #menu ul li:hover opcion.nivel1 {
+background-color: #6FCDEC;;
+color: #000;
+position: relative;
+}
+#menu ul li opcion.nivel1 {display: block!important;display: none;
+position: relative;
+}
+#menu ul li ul {display: none;
+}
+#menu ul li opcion:hover ul, #menu ul li:hover ul {display: block;
+position: absolute;left: 142px;top:-1px!important;top: -31px;
+}
+
+#menu ul li ul li {display: block;
+text-decoration: none;
+color: #FFF;
+background-color: #5F75B1;
+border: solid 1px #fff;
+border-radius:6px 6px 6px 6px; 
+border-top: none;
+padding: 8px;
+position: relative;	 
+width: 150px;
+}
+
+#menu ul li:hover {
+position: relative;
+background-color: #6FCDEC;
+color: #000;
+}
+

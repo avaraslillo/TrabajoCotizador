@@ -1,0 +1,106 @@
+@charset "utf-8";
+/* CSS Document */
+#body{
+	font: Arial, Helvetica, sans-serif;
+	height:100%;
+	color:#FFF;
+	}
+
+#cabecera-admin{
+	color:#06F;
+	background-color:#FFF;
+	font:Arial, Helvetica, sans-serif;
+	height:160px;
+	}
+	
+#cabecera-admin2{
+	background-color:#5F75B1;
+	height:120px;
+	padding-bottom:10px;
+	}	
+#ZonaCentral{
+	height:auto;
+	min-height:600px;
+	}					
+#PanelAdmin{
+	position: relative;
+	float: left;
+	background-color: #FFF;
+	color:#000;
+	width: 73.5%;
+	margin-left: 5px;
+	padding-top: 5px;
+	height: inherit;
+	}
+#PanelIngreso{
+	background-color: #666;
+	color:#FFF;	
+	width:1300px;
+	height:inherit;	
+	}	
+#IngresoAdmin{
+	float:left;
+	background-color:#5F75B1;
+	width:450px;
+	height:250px;
+    position:relative;
+    margin-top:30px;	
+	border:double;	
+	}
+#Resultado{
+	float:left;
+	text-align:center;
+	background-color:#FFF;
+	width:250px;
+	height:250px;
+	margin:5px 5px 5px 5px;
+	border:solid 1px;
+	}
+
+#Resultado img{
+	position:inherit;
+	left:15%;
+	
+	}
+	
+
+table.falsa {border-collapse:collapse;
+border:0px;
+float: left;
+position: relative;
+}
+
+.sidenav{
+	padding-top:5px;
+	width:25%;
+	float:left;
+	height:inherit;
+	background-color:#FFF;
+	}
+	
+.FormAdmin{
+	border:double;
+	margin-left:4px;
+	margin-right:4px;
+	background-color:#5F75B1;
+	}	
+
+
+small{
+	font-size:smaller;
+	}
+#NuevasTiendas{
+	display:none;
+
+	}	
+	
+#footer{
+	margin-top:10px;
+	float:left;
+	width:1400px;
+	height:80px;
+	background-color:#5F75B1;
+	color:#fff;
+	text-align:center;
+	}		
+	

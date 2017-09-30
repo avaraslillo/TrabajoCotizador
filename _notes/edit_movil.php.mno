@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<info>
+	<infoitem key="UD_MostrarMarcas" value="name:ID_MARCA;datatype:string" />
+	<infoitem key="UD_MostrarMovil" value="name:ID_MOVIL;datatype:int,name:MARCA;datatype:string,name:MODELO;datatype:string,name:TAMANO_PANTALLA;datatype:string,name:SISTEMA_OPERATIVO;datatype:string,name:CAMARA_TRASERA;datatype:string,name:CAMARA_FRONTAL;datatype:string,name:PROCESADOR;datatype:string,name:MEMORIA_INTERNA;datatype:string,name:EXPANSION_DE_MEMORIA;datatype:int,name:PESO;datatype:real,name:CON_2G;datatype:int,name:CON_3G;datatype:int,name:CON_4G;datatype:int,name:BATERIA;datatype:real" />
+	<infoitem key="UD_AnadirImagenes" value="name:ID_MOVIL;datatype:int" />
+	<infoitem key="UD_MostrarTiendasActivas" value="name:ID_MOVIL;datatype:int,name:ID_TIENDA;datatype:int,name:ENLACE_PT;datatype:blob,name:PRECIO_CLP;datatype:int,name:NOMBRE_TIENDA;datatype:string" />
+	<infoitem key="UD_MostrarTiendasInactivas" value="name:ID_TIENDA;datatype:int,name:NOMBRE_TIENDA;datatype:string" />
+	<infoitem key="UD_MostrarImagenes" value="name:ID_MOVIL;datatype:int,name:ID_IMAGEN;datatype:int,name:ORDEN_IMAGEN;datatype:int,name:ORDEN_IMAGEN;datatype:int,name:RUTA_IMAGEN;datatype:blob" />
+	<infoitem key="UD_MostrarImagen1" value="name:ID_MOVIL;datatype:int,name:ID_IMAGEN;datatype:int,name:ORDEN_IMAGEN;datatype:int,name:RUTA_IMAGEN;datatype:blob" />
+	<infoitem key="UD_MostrarImagen2" value="name:ID_MOVIL;datatype:int,name:ID_IMAGEN;datatype:int,name:ORDEN_IMAGEN;datatype:int,name:RUTA_IMAGEN;datatype:blob" />
+	<infoitem key="UD_MostrarImagen3" value="name:ID_MOVIL;datatype:int,name:ID_IMAGEN;datatype:int,name:ORDEN_IMAGEN;datatype:int,name:RUTA_IMAGEN;datatype:blob" />
+	<infoitem key="UD_MostrarImagen4" value="name:ID_MOVIL;datatype:int,name:ID_IMAGEN;datatype:int,name:ORDEN_IMAGEN;datatype:int,name:RUTA_IMAGEN;datatype:blob" />
+</info>
