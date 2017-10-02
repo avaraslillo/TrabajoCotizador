@@ -1,13 +1,11 @@
 <?php require_once('Connections/ConexionCotizador.php'); ?>
 <?php
 if (!function_exists("GetSQLValueString")) {
-function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "") 
+function GetSQLValueString($theValue, $theType,  $theDefinedValue = "", $theNotDefinedValue = "") 
 {
   if (PHP_VERSION < 6) {
     $theValue = get_magic_quotes_gpc() ? stripslashes($theValue) : $theValue;
   }
-
-  $theValue = function_exists("mysql_real_escape_string") ? mysql_real_escape_string($theValue) : mysql_escape_string($theValue);
 
   switch ($theType) {
     case "text":
@@ -36,20 +34,20 @@ if($_GET['palabra']==''){
 	print('');	
 }
 else{	
-	mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
+	mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
 	$query_BuscarAJAX = "SELECT * FROM movil WHERE MODELO LIKE '%".$_GET['palabra']."%'
 ORDER BY ID_MOVIL ASC";
-	$BuscarAJAX = mysql_query($query_BuscarAJAX, 	$ConexionCotizador) or die(mysql_error());
-	$row_BuscarAJAX = mysql_fetch_assoc($BuscarAJAX);
-	$totalRows_BuscarAJAX = mysql_num_rows($BuscarAJAX);
+	$BuscarAJAX = mysqli_query( 	$ConexionCotizador, $query_BuscarAJAX) or die(mysqli_error($BuscarAJAX));
+	$row_BuscarAJAX = mysqli_fetch_assoc($BuscarAJAX);
+	$totalRows_BuscarAJAX = mysqli_num_rows($BuscarAJAX);
 	do{
 	
 		print ($row_BuscarAJAX['MODELO']."<br>");
-	} while ($row_BuscarAJAX = mysql_fetch_assoc($BuscarAJAX));
+	} while ($row_BuscarAJAX = mysqli_fetch_assoc($BuscarAJAX));
 }
 ?>
 <?php
-mysql_free_result($BuscarAJAX);
+mysqli_free_result($BuscarAJAX);
 ?>
 
 

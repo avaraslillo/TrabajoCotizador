@@ -1,0 +1,1 @@
+C:\wamp\bin\php\php5.4.3\php.exe C:\wamp\www\CotizadorOnline\scriptTiempo.php

@@ -1,6 +1,6 @@
 <?php require_once('Connections/ConexionCotizador.php'); ?>
 <?php
-/*if (!isset($_SESSION)) {
+if (!isset($_SESSION)) {
   session_start();
 }
 $MM_authorizedUsers = "";
@@ -32,7 +32,7 @@ function isAuthorized($strUsers, $strGroups, $UserName, $UserGroup) {
   return $isValid; 
 }
 
-$MM_restrictGoTo = "admin.php";
+$MM_restrictGoTo = "ingresoadmin.php";
 if (!((isset($_SESSION['MM_Username'])) && (isAuthorized("",$MM_authorizedUsers, $_SESSION['MM_Username'], $_SESSION['MM_UserGroup'])))) {   
   $MM_qsChar = "?";
   $MM_referrer = $_SERVER['PHP_SELF'];
@@ -42,7 +42,30 @@ if (!((isset($_SESSION['MM_Username'])) && (isAuthorized("",$MM_authorizedUsers,
   $MM_restrictGoTo = $MM_restrictGoTo. $MM_qsChar . "accesscheck=" . urlencode($MM_referrer);
   header("Location: ". $MM_restrictGoTo); 
   exit;
-}*/
+}
+
+// ** Logout the current user. **
+$logoutAction = $_SERVER['PHP_SELF']."?doLogout=true";
+if ((isset($_SERVER['QUERY_STRING'])) && ($_SERVER['QUERY_STRING'] != "")){
+  $logoutAction .="&". htmlentities($_SERVER['QUERY_STRING']);
+}
+
+if ((isset($_GET['doLogout'])) &&($_GET['doLogout']=="true")){
+  //to fully log out a visitor we need to clear the session varialbles
+  $_SESSION['MM_Username'] = NULL;
+  $_SESSION['MM_UserGroup'] = NULL;
+  $_SESSION['PrevUrl'] = NULL;
+  unset($_SESSION['MM_Username']);
+  unset($_SESSION['MM_UserGroup']);
+  unset($_SESSION['PrevUrl']);
+	
+  $logoutGoTo = "ingresoadmin.php";
+  if ($logoutGoTo) {
+    header("Location: $logoutGoTo");
+    exit;
+  }
+}
+
 ?>
 <?php
 if (!function_exists("GetSQLValueString")) {
@@ -52,7 +75,9 @@ function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDe
     $theValue = get_magic_quotes_gpc() ? stripslashes($theValue) : $theValue;
   }
 
-  $theValue = function_exists("mysql_real_escape_string") ? mysql_real_escape_string($theValue) : mysql_escape_string($theValue);
+//  $theValue = function_exists("mysqli_real_escape_string") ? mysqli_real_escape_string($ConexionCotizador, $theValue) : mysqli_escape_string($ConexionCotizador, $theValue);
+
+$theValue = mysqli_real_escape_string($ConexionCotizador, $theValue);
 
   switch ($theType) {
     case "text":
@@ -97,8 +122,8 @@ if ((isset($_POST["MM_insert"])) && ($_POST["MM_insert"] == "form1")) {
                        GetSQLValueString($_POST['CONECTIVIDAD'], "text"),
                        GetSQLValueString($_POST['BATERIA'], "text"));
 
-  mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
-  $Result1 = mysql_query($insertSQL, $ConexionCotizador) or die(mysql_error());
+  mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
+  $Result1 = mysqli_query($ConexionCotizador, $insertSQL) or die(mysqli_error($Result1));
 }
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -117,6 +142,7 @@ if ((isset($_POST["MM_insert"])) && ($_POST["MM_insert"] == "form1")) {
 <img src="imagenes/logo/logo.PNG" width="140" height="152" style="position:relative; left:45%;"  /></div>  
 </div>
 <div id="cabecera-admin2">
+<span style="float:right; margin-right:15px; "><a href="<?php echo $logoutAction ?>" style="color:#FFF;">Cerrar Sesión</a></span>
 <h3 style="position:relative; top:40%; color:#FFF; font:Arial, Helvetica, sans-serif; font-size:24px; text-align:center;">Administración</h3>
 </div>
 <div id="ZonaCentral">

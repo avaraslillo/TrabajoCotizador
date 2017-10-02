@@ -1,14 +1,78 @@
-<?php require_once('Connections/ConexionCotizador.php'); ?>
+<?php require_once('Connections/ConexionCotizador.php');
+if (!isset($_SESSION)) {
+  session_start();
+}
+$MM_authorizedUsers = "";
+$MM_donotCheckaccess = "true";
+
+// *** Restrict Access To Page: Grant or deny access to this page
+function isAuthorized($strUsers, $strGroups, $UserName, $UserGroup) { 
+  // For security, start by assuming the visitor is NOT authorized. 
+  $isValid = False; 
+
+  // When a visitor has logged into this site, the Session variable MM_Username set equal to their username. 
+  // Therefore, we know that a user is NOT logged in if that Session variable is blank. 
+  if (!empty($UserName)) { 
+    // Besides being logged in, you may restrict access to only certain users based on an ID established when they login. 
+    // Parse the strings into arrays. 
+    $arrUsers = Explode(",", $strUsers); 
+    $arrGroups = Explode(",", $strGroups); 
+    if (in_array($UserName, $arrUsers)) { 
+      $isValid = true; 
+    } 
+    // Or, you may restrict access to only certain users based on their username. 
+    if (in_array($UserGroup, $arrGroups)) { 
+      $isValid = true; 
+    } 
+    if (($strUsers == "") && true) { 
+      $isValid = true; 
+    } 
+  } 
+  return $isValid; 
+}
+
+$MM_restrictGoTo = "ingresoadmin.php";
+if (!((isset($_SESSION['MM_Username'])) && (isAuthorized("",$MM_authorizedUsers, $_SESSION['MM_Username'], $_SESSION['MM_UserGroup'])))) {   
+  $MM_qsChar = "?";
+  $MM_referrer = $_SERVER['PHP_SELF'];
+  if (strpos($MM_restrictGoTo, "?")) $MM_qsChar = "&";
+  if (isset($_SERVER['QUERY_STRING']) && strlen($_SERVER['QUERY_STRING']) > 0) 
+  $MM_referrer .= "?" . $_SERVER['QUERY_STRING'];
+  $MM_restrictGoTo = $MM_restrictGoTo. $MM_qsChar . "accesscheck=" . urlencode($MM_referrer);
+  header("Location: ". $MM_restrictGoTo); 
+  exit;
+}
+
+// ** Logout the current user. **
+$logoutAction = $_SERVER['PHP_SELF']."?doLogout=true";
+if ((isset($_SERVER['QUERY_STRING'])) && ($_SERVER['QUERY_STRING'] != "")){
+  $logoutAction .="&". htmlentities($_SERVER['QUERY_STRING']);
+}
+
+if ((isset($_GET['doLogout'])) &&($_GET['doLogout']=="true")){
+  //to fully log out a visitor we need to clear the session varialbles
+  $_SESSION['MM_Username'] = NULL;
+  $_SESSION['MM_UserGroup'] = NULL;
+  $_SESSION['PrevUrl'] = NULL;
+  unset($_SESSION['MM_Username']);
+  unset($_SESSION['MM_UserGroup']);
+  unset($_SESSION['PrevUrl']);
+	
+  $logoutGoTo = "ingresoadmin.php";
+  if ($logoutGoTo) {
+    header("Location: $logoutGoTo");
+    exit;
+  }
+}
+?>
 
 <?php
 if (!function_exists("GetSQLValueString")) {
-function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "") 
+function GetSQLValueString($theValue, $theType,  $theDefinedValue = "", $theNotDefinedValue = "") 
 {
   if (PHP_VERSION < 6) {
     $theValue = get_magic_quotes_gpc() ? stripslashes($theValue) : $theValue;
   }
-
-  $theValue = function_exists("mysql_real_escape_string") ? mysql_real_escape_string($theValue) : mysql_escape_string($theValue);
 
   switch ($theType) {
     case "text":
@@ -39,21 +103,21 @@ if (isset($_SERVER['QUERY_STRING'])) {
 ?>
 
                        <?php
-mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
+mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
 $query_MostrarMarcas = "SELECT * FROM marca";
-$MostrarMarcas = mysql_query($query_MostrarMarcas, $ConexionCotizador) or die(mysql_error());
-$row_MostrarMarcas = mysql_fetch_assoc($MostrarMarcas);
-$totalRows_MostrarMarcas = mysql_num_rows($MostrarMarcas);
+$MostrarMarcas = mysqli_query($ConexionCotizador, $query_MostrarMarcas) or die(mysqli_error($MostrarMarcas));
+$row_MostrarMarcas = mysqli_fetch_assoc($MostrarMarcas);
+$totalRows_MostrarMarcas = mysqli_num_rows($MostrarMarcas);
 
 $VARMovil_MostrarMovil = "0";
 if (isset($_GET["IDMovil"])) {
   $VARMovil_MostrarMovil = $_GET["IDMovil"];
 }
-mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
+mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
 $query_MostrarMovil = sprintf("SELECT * FROM movil WHERE movil.ID_MOVIL=%s", GetSQLValueString($VARMovil_MostrarMovil, "int"));
-$MostrarMovil = mysql_query($query_MostrarMovil, $ConexionCotizador) or die(mysql_error());
-$row_MostrarMovil = mysql_fetch_assoc($MostrarMovil);
-$totalRows_MostrarMovil = mysql_num_rows($MostrarMovil);
+$MostrarMovil = mysqli_query( $ConexionCotizador, $query_MostrarMovil) or die(mysqli_error($MostrarMovil));
+$row_MostrarMovil = mysqli_fetch_assoc($MostrarMovil);
+$totalRows_MostrarMovil = mysqli_num_rows($MostrarMovil);
 ?>
                        <?php
 
@@ -75,81 +139,81 @@ if ((isset($_POST["MM_update"])) && ($_POST["MM_update"] == "FormMovil")) {
                        GetSQLValueString($_POST['BATERIA'], "double"),
                        GetSQLValueString($_POST['ID'], "int"));
 
-  mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
-  $Result1 = mysql_query($updateSQL, $ConexionCotizador) or die(mysql_error());
+  mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
+  $Result1 = mysqli_query($ConexionCotizador, $updateSQL) or die(mysqli_error($Result1));
 }
 $IDM_AnadirImagenes = "0";
 if (isset($_POST['MODELO'])) {
   $IDM_AnadirImagenes = $_POST['MODELO'];
 }
-mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
+mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
 $query_AnadirImagenes = sprintf("SELECT movil.ID_MOVIL FROM movil WHERE movil.MODELO=%s", GetSQLValueString($IDM_AnadirImagenes, "text"));
-$AnadirImagenes = mysql_query($query_AnadirImagenes, $ConexionCotizador) or die(mysql_error());
-$row_AnadirImagenes = mysql_fetch_assoc($AnadirImagenes);
-$totalRows_AnadirImagenes = mysql_num_rows($AnadirImagenes);
+$AnadirImagenes = mysqli_query( $ConexionCotizador, $query_AnadirImagenes) or die(mysqli_error($AnadirImagenes));
+$row_AnadirImagenes = mysqli_fetch_assoc($AnadirImagenes);
+$totalRows_AnadirImagenes = mysqli_num_rows($AnadirImagenes);
 
 $VAR_MostrarTiendasActivas = "0";
 if (isset($_GET['IDMovil'])) {
   $VAR_MostrarTiendasActivas = $_GET['IDMovil'];
 }
-mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
+mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
 $query_MostrarTiendasActivas = sprintf("SELECT relacion_tm.ID_MOVIL, relacion_tm.ID_TIENDA, relacion_tm.ENLACE_PT, relacion_tm.PRECIO_CLP, tienda.NOMBRE_TIENDA  FROM relacion_tm, tienda WHERE relacion_tm.ID_MOVIL=%s AND tienda.ID_TIENDA=relacion_tm.ID_TIENDA", GetSQLValueString($VAR_MostrarTiendasActivas, "int"));
-$MostrarTiendasActivas = mysql_query($query_MostrarTiendasActivas, $ConexionCotizador) or die(mysql_error());
-$row_MostrarTiendasActivas = mysql_fetch_assoc($MostrarTiendasActivas);
-$totalRows_MostrarTiendasActivas = mysql_num_rows($MostrarTiendasActivas);
+$MostrarTiendasActivas = mysqli_query($ConexionCotizador, $query_MostrarTiendasActivas) or die(mysqli_error($MostrarTiendasActivas));
+$row_MostrarTiendasActivas = mysqli_fetch_assoc($MostrarTiendasActivas);
+$totalRows_MostrarTiendasActivas = mysqli_num_rows($MostrarTiendasActivas);
 
 $VAR_MostrarTiendasInactivas = "0";
 if (isset($_GET['IDMovil'])) {
   $VAR_MostrarTiendasInactivas = $_GET['IDMovil'];
 }
-mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
+mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
 $query_MostrarTiendasInactivas = sprintf("SELECT tienda.ID_TIENDA, tienda.NOMBRE_TIENDA FROM tienda WHERE tienda.ID_TIENDA NOT IN (SELECT tienda.ID_TIENDA FROM relacion_tm, tienda WHERE relacion_tm.ID_MOVIL=%s AND tienda.ID_TIENDA = relacion_tm.ID_TIENDA)", GetSQLValueString($VAR_MostrarTiendasInactivas, "int"));
-$MostrarTiendasInactivas = mysql_query($query_MostrarTiendasInactivas, $ConexionCotizador) or die(mysql_error());
-$row_MostrarTiendasInactivas = mysql_fetch_assoc($MostrarTiendasInactivas);
-$totalRows_MostrarTiendasInactivas = mysql_num_rows($MostrarTiendasInactivas);
+$MostrarTiendasInactivas = mysqli_query($ConexionCotizador, $query_MostrarTiendasInactivas) or die(mysqli_error($MostrarTiendasInactivas));
+$row_MostrarTiendasInactivas = mysqli_fetch_assoc($MostrarTiendasInactivas);
+$totalRows_MostrarTiendasInactivas = mysqli_num_rows($MostrarTiendasInactivas);
 
 $VAR_MostrarImagen1 = "0";
 if (isset($_GET['IDMovil'])) {
   $VAR_MostrarImagen1 = $_GET['IDMovil'];
 }
-mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
+mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
 $query_MostrarImagen1 = sprintf("SELECT movil.ID_MOVIL, imagen.ID_IMAGEN, imagen.ORDEN_IMAGEN, imagen.RUTA_IMAGEN FROM movil, imagen WHERE movil.ID_MOVIL=%s  AND imagen.ID_MOVIL=movil.ID_MOVIL AND imagen.ID_IMAGEN=1", GetSQLValueString($VAR_MostrarImagen1, "int"));
-$MostrarImagen1 = mysql_query($query_MostrarImagen1, $ConexionCotizador) or die(mysql_error());
-$row_MostrarImagen1 = mysql_fetch_assoc($MostrarImagen1);
-$totalRows_MostrarImagen1 = mysql_num_rows($MostrarImagen1);
+$MostrarImagen1 = mysqli_query($ConexionCotizador, $query_MostrarImagen1) or die(mysqli_error($MostrarImagen1));
+$row_MostrarImagen1 = mysqli_fetch_assoc($MostrarImagen1);
+$totalRows_MostrarImagen1 = mysqli_num_rows($MostrarImagen1);
 
 $VAR_MostrarImagen2 = "0";
 if (isset($_GET['IDMovil'])) {
   $VAR_MostrarImagen2 = $_GET['IDMovil'];
 }
-mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
+mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
 $query_MostrarImagen2 = sprintf("SELECT movil.ID_MOVIL, imagen.ID_IMAGEN, imagen.ORDEN_IMAGEN, imagen.RUTA_IMAGEN FROM movil, imagen WHERE movil.ID_MOVIL=%s  AND imagen.ID_MOVIL=movil.ID_MOVIL AND imagen.ID_IMAGEN=2", GetSQLValueString($VAR_MostrarImagen2, "int"));
-$MostrarImagen2 = mysql_query($query_MostrarImagen2, $ConexionCotizador) or die(mysql_error());
-$row_MostrarImagen2 = mysql_fetch_assoc($MostrarImagen2);
-$totalRows_MostrarImagen2 = mysql_num_rows($MostrarImagen2);
+$MostrarImagen2 = mysqli_query($ConexionCotizador, $query_MostrarImagen2) or die(mysqli_error($MostrarImagen2));
+$row_MostrarImagen2 = mysqli_fetch_assoc($MostrarImagen2);
+$totalRows_MostrarImagen2 = mysqli_num_rows($MostrarImagen2);
 
 $VAR_MostrarImagen3 = "0";
 if (isset($_GET['IDMovil'])) {
   $VAR_MostrarImagen3 = $_GET['IDMovil'];
 }
-mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
+mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
 $query_MostrarImagen3 = sprintf("SELECT movil.ID_MOVIL, imagen.ID_IMAGEN, imagen.ORDEN_IMAGEN, imagen.RUTA_IMAGEN FROM movil, imagen WHERE movil.ID_MOVIL=%s  AND imagen.ID_MOVIL=movil.ID_MOVIL AND imagen.ID_IMAGEN=3", GetSQLValueString($VAR_MostrarImagen3, "int"));
-$MostrarImagen3 = mysql_query($query_MostrarImagen3, $ConexionCotizador) or die(mysql_error());
-$row_MostrarImagen3 = mysql_fetch_assoc($MostrarImagen3);
-$totalRows_MostrarImagen3 = mysql_num_rows($MostrarImagen3);
+$MostrarImagen3 = mysqli_query( $ConexionCotizador, $query_MostrarImagen3) or die(mysqli_error($MostrarImagen3));
+$row_MostrarImagen3 = mysqli_fetch_assoc($MostrarImagen3);
+$totalRows_MostrarImagen3 = mysqli_num_rows($MostrarImagen3);
 
 $VAR_MostrarImagen4 = "0";
 if (isset($_GET['IDMovil'])) {
   $VAR_MostrarImagen4 = $_GET['IDMovil'];
 }
-mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
+mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
 $query_MostrarImagen4 = sprintf("SELECT movil.ID_MOVIL, imagen.ID_IMAGEN, imagen.ORDEN_IMAGEN, imagen.RUTA_IMAGEN FROM movil, imagen WHERE movil.ID_MOVIL=%s  AND imagen.ID_MOVIL=movil.ID_MOVIL AND imagen.ID_IMAGEN=4", GetSQLValueString($VAR_MostrarImagen4, "int"));
-$MostrarImagen4 = mysql_query($query_MostrarImagen4, $ConexionCotizador) or die(mysql_error());
-$row_MostrarImagen4 = mysql_fetch_assoc($MostrarImagen4);
-$totalRows_MostrarImagen4 = mysql_num_rows($MostrarImagen4);
+$MostrarImagen4 = mysqli_query( $ConexionCotizador, $query_MostrarImagen4) or die(mysqli_error($MostrarImagen4));
+$row_MostrarImagen4 = mysqli_fetch_assoc($MostrarImagen4);
+$totalRows_MostrarImagen4 = mysqli_num_rows($MostrarImagen4);
 ?>
 <?php
-/*$row_Buscar= mysql_fetch_array($AnadirImagenes);
+/*$row_Buscar= mysqli_fetch_array($AnadirImagenes);
 $IDM=$row_Buscar[0];
 if(isset($_FILES['Imagen1']['name']) && isset($IDM) && $IDM!=0){
 	$foto = $_FILES['Imagen1']['name'];$ruta= $_FILES['Imagen1']['tmp_name'];
@@ -159,8 +223,8 @@ if(isset($_FILES['Imagen1']['name']) && isset($IDM) && $IDM!=0){
                        GetSQLValueString($destino, "text"),
                        GetSQLValueString($IDM, "int"));
 
-  mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
-  $Result1 = mysql_query($insertSQL, $ConexionCotizador) or die(mysql_error());
+  mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
+  $Result1 = mysqli_query($ConexionCotizador, $insertSQL) or die(mysqli_error($ConexionCotizador));
 }*/
 ?>
 <?php
@@ -179,8 +243,8 @@ if ((isset($_POST["MM_update"])) && ($_POST["MM_update"] == "FormMovil")) {
                        GetSQLValueString($prclp[$i], "int"),
                        GetSQLValueString($_POST['ID'], "int"),
                        GetSQLValueString($distienda[$i], "int"));
-  		mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
-  		$ResultTiendas = mysql_query($insertSQL, $ConexionCotizador) or die(mysql_error());	
+  		mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
+  		$ResultTiendas = mysqli_query($ConexionCotizador, $insertSQL) or die(mysqli_error($ResultTiendas));	
   		if(!$ResultTiendas){
 			$error=1;
 		}
@@ -211,8 +275,8 @@ if ((isset($_POST["MM_insert"])) && ($_POST["MM_insert"] == "FormMovil")) {
                        GetSQLValueString($distienda[$i], "int"),
                        GetSQLValueString($enlace[$i], "text"),
                        GetSQLValueString($prclp[$i], "int"));
-  		mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
-  		$ResultTiendas = mysql_query($insertSQL, $ConexionCotizador) or die(mysql_error());	
+  		mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
+  		$ResultTiendas = mysqli_query($ConexionCotizador, $insertSQL) or die(mysqli_error($ResultTiendas));	
   		if(!$ResultTiendas){
 			$error=1;
 		}
@@ -246,6 +310,8 @@ if ((isset($_POST["MM_insert"])) && ($_POST["MM_insert"] == "FormMovil")) {
 <img src="imagenes/logo/logo.PNG" width="140" height="152" style="position:relative; left:45%;"  /></div>  
 </div>
 <div id="cabecera-admin2">
+<span style="float:right; margin-right:15px; "><a href="<?php echo $logoutAction ?>" style="color:#FFF;">Cerrar Sesión</a></span>
+<h3 style="position:relative; top:40%; color:#FFF; font:Arial, Helvetica, sans-serif; font-size:24px; text-align:center;">Administración</h3>
 </div>
 <div id="ZonaCentral">
 <div class="sidenav">
@@ -272,11 +338,11 @@ do {
 ?>
               <option value="<?php echo $row_MostrarMarcas['ID_MARCA']?>" <?php if($row_MostrarMarcas['ID_MARCA']==$row_MostrarMovil['MARCA']){echo "selected";}?>><?php echo $row_MostrarMarcas['ID_MARCA']?></option>
               <?php
-} while ($row_MostrarMarcas = mysql_fetch_assoc($MostrarMarcas));
-  $rows = mysql_num_rows($MostrarMarcas);
+} while ($row_MostrarMarcas = mysqli_fetch_assoc($MostrarMarcas));
+  $rows = mysqli_num_rows($MostrarMarcas);
   if($rows > 0) {
-      mysql_data_seek($MostrarMarcas, 0);
-	  $row_MostrarMarcas = mysql_fetch_assoc($MostrarMarcas);
+      mysqli_data_seek($MostrarMarcas, 0);
+	  $row_MostrarMarcas = mysqli_fetch_assoc($MostrarMarcas);
   }
 ?>
             </select></td>
@@ -380,7 +446,7 @@ do {
     <input name="EnlaceActivo[]" type="text" value='.$row_MostrarTiendasActivas['ENLACE_PT'].' size="35" maxlength="250" disabled="true"/>
     <br />
     <input name="PrCLPActivo[]" type="text" value="'.$row_MostrarTiendasActivas['PRECIO_CLP'].'" size="20" maxlength="15" disabled="true" />
-    <br />'; $num++;} while ($row_MostrarTiendasActivas = mysql_fetch_assoc($MostrarTiendasActivas));
+    <br />'; $num++;} while ($row_MostrarTiendasActivas = mysqli_fetch_assoc($MostrarTiendasActivas));
 	echo '<br><a onclick="mostrarTiendas();" ><span style="color:#FADB03; background-color:#666; padding:5px 5px 5px 5px; text-decoration:under-line";>Clic aquí para agregar nuevas tiendas que vendan el móvil</span></a></br>';
 			echo '<div id="NuevasTiendas">
           <br />';
@@ -389,7 +455,7 @@ do {
     <input name="EnlaceNuevo[]" type="text" value="Enlace del producto en la tienda" size="35" maxlength="250" disabled="true"/>
     <br />
     <input name="PrCLPNuevo[]" type="text" value="Precio Pesos CH" size="20" maxlength="15" disabled="true" />
-    <br />'; $num++;} while ($row_MostrarTiendasInactivas = mysql_fetch_assoc($MostrarTiendasInactivas)); 	  
+    <br />'; $num++;} while ($row_MostrarTiendasInactivas = mysqli_fetch_assoc($MostrarTiendasInactivas)); 	  
 	echo '</div>';
 		  ?>
 			<br />
@@ -416,20 +482,20 @@ do {
 </body>
 </html>
 <?php
-mysql_free_result($MostrarMarcas);
+mysqli_free_result($MostrarMarcas);
 
-mysql_free_result($MostrarMovil);
+mysqli_free_result($MostrarMovil);
 
-mysql_free_result($MostrarTiendasActivas);
+mysqli_free_result($MostrarTiendasActivas);
 
-mysql_free_result($MostrarTiendasInactivas);
+mysqli_free_result($MostrarTiendasInactivas);
 
-mysql_free_result($MostrarImagen1);
+mysqli_free_result($MostrarImagen1);
 
-mysql_free_result($MostrarImagen2);
+mysqli_free_result($MostrarImagen2);
 
-mysql_free_result($MostrarImagen3);
+mysqli_free_result($MostrarImagen3);
 
-mysql_free_result($MostrarImagen4);
+mysqli_free_result($MostrarImagen4);
 
 ?>

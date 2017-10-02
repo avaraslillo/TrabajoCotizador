@@ -1,16 +1,80 @@
-<?php require_once('Connections/ConexionCotizador.php'); ?>
+<?php require_once('Connections/ConexionCotizador.php');
+if (!isset($_SESSION)) {
+  session_start();
+}
+$MM_authorizedUsers = "";
+$MM_donotCheckaccess = "true";
+
+// *** Restrict Access To Page: Grant or deny access to this page
+function isAuthorized($strUsers, $strGroups, $UserName, $UserGroup) { 
+  // For security, start by assuming the visitor is NOT authorized. 
+  $isValid = False; 
+
+  // When a visitor has logged into this site, the Session variable MM_Username set equal to their username. 
+  // Therefore, we know that a user is NOT logged in if that Session variable is blank. 
+  if (!empty($UserName)) { 
+    // Besides being logged in, you may restrict access to only certain users based on an ID established when they login. 
+    // Parse the strings into arrays. 
+    $arrUsers = Explode(",", $strUsers); 
+    $arrGroups = Explode(",", $strGroups); 
+    if (in_array($UserName, $arrUsers)) { 
+      $isValid = true; 
+    } 
+    // Or, you may restrict access to only certain users based on their username. 
+    if (in_array($UserGroup, $arrGroups)) { 
+      $isValid = true; 
+    } 
+    if (($strUsers == "") && true) { 
+      $isValid = true; 
+    } 
+  } 
+  return $isValid; 
+}
+
+$MM_restrictGoTo = "ingresoadmin.php";
+if (!((isset($_SESSION['MM_Username'])) && (isAuthorized("",$MM_authorizedUsers, $_SESSION['MM_Username'], $_SESSION['MM_UserGroup'])))) {   
+  $MM_qsChar = "?";
+  $MM_referrer = $_SERVER['PHP_SELF'];
+  if (strpos($MM_restrictGoTo, "?")) $MM_qsChar = "&";
+  if (isset($_SERVER['QUERY_STRING']) && strlen($_SERVER['QUERY_STRING']) > 0) 
+  $MM_referrer .= "?" . $_SERVER['QUERY_STRING'];
+  $MM_restrictGoTo = $MM_restrictGoTo. $MM_qsChar . "accesscheck=" . urlencode($MM_referrer);
+  header("Location: ". $MM_restrictGoTo); 
+  exit;
+}
+
+// ** Logout the current user. **
+$logoutAction = $_SERVER['PHP_SELF']."?doLogout=true";
+if ((isset($_SERVER['QUERY_STRING'])) && ($_SERVER['QUERY_STRING'] != "")){
+  $logoutAction .="&". htmlentities($_SERVER['QUERY_STRING']);
+}
+
+if ((isset($_GET['doLogout'])) &&($_GET['doLogout']=="true")){
+  //to fully log out a visitor we need to clear the session varialbles
+  $_SESSION['MM_Username'] = NULL;
+  $_SESSION['MM_UserGroup'] = NULL;
+  $_SESSION['PrevUrl'] = NULL;
+  unset($_SESSION['MM_Username']);
+  unset($_SESSION['MM_UserGroup']);
+  unset($_SESSION['PrevUrl']);
+	
+  $logoutGoTo = "ingresoadmin.php";
+  if ($logoutGoTo) {
+    header("Location: $logoutGoTo");
+    exit;
+  }
+}
+?>
 
 <?php
 
 
 if (!function_exists("GetSQLValueString")) {
-function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "") 
+function GetSQLValueString($theValue, $theType,  $theDefinedValue = "", $theNotDefinedValue = "") 
 {
   if (PHP_VERSION < 6) {
     $theValue = get_magic_quotes_gpc() ? stripslashes($theValue) : $theValue;
   }
-
-  $theValue = function_exists("mysql_real_escape_string") ? mysql_real_escape_string($theValue) : mysql_escape_string($theValue);
 
   switch ($theType) {
     case "text":
@@ -59,8 +123,8 @@ if ((isset($_POST["MM_insert"])) && ($_POST["MM_insert"] == "FormMovil")) {
 					   
 					   
 
-  mysql_select_db($database_ConexionCotizador, $ConexionCotizador);  
-  $ResultMovil = mysql_query($insertSQL, $ConexionCotizador) or die(mysql_error());
+  mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);  
+  $ResultMovil = mysqli_query($ConexionCotizador, $insertSQL) or die(mysqli_error($ResultMovil));
 if(!$ResultMovil){  
 echo '<script type="text/javascript" >
         alert("ERROR EN LA INSERCIÓN DE DATOS DEL MÓVIL"); //te mostrara el mensaje que quieras
@@ -70,28 +134,28 @@ echo '<script type="text/javascript" >
 	if (isset($_POST['MODELO'])) {
   		$Modelo = $_POST['MODELO'];
 	}
-	mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
+	mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
 	$query_AnadirImagenes = sprintf("SELECT movil.ID_MOVIL FROM movil WHERE movil.MODELO=%s", GetSQLValueString($Modelo, "text"));
-$Consulta = mysql_query($query_AnadirImagenes, $ConexionCotizador) or die(mysql_error());
-$row_Consulta= mysql_fetch_array($Consulta);
+$Consulta = mysqli_query($ConexionCotizador, $query_AnadirImagenes) or die(mysqli_error($ConexionCotizador));
+$row_Consulta= mysqli_fetch_array($Consulta);
 $IDM=$row_Consulta[0];
 	  
 	}
 }
 ?>
                        <?php
-mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
+mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
 $query_MostrarMarcas = "SELECT * FROM marca";
-$MostrarMarcas = mysql_query($query_MostrarMarcas, $ConexionCotizador) or die(mysql_error());
-$row_MostrarMarcas = mysql_fetch_assoc($MostrarMarcas);
-$totalRows_MostrarMarcas = mysql_num_rows($MostrarMarcas);
+$MostrarMarcas = mysqli_query($ConexionCotizador, $query_MostrarMarcas) or die(mysqli_error($ConexionCotizador));
+$row_MostrarMarcas = mysqli_fetch_assoc($MostrarMarcas);
+$totalRows_MostrarMarcas = mysqli_num_rows($MostrarMarcas);
 
 
-mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
+mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
 $query_MostrarTiendas = "SELECT * FROM tienda";
-$MostrarTiendas = mysql_query($query_MostrarTiendas, $ConexionCotizador) or die(mysql_error());
-$row_MostrarTiendas = mysql_fetch_assoc($MostrarTiendas);
-$totalRows_MostrarTiendas = mysql_num_rows($MostrarTiendas);
+$MostrarTiendas = mysqli_query($ConexionCotizador, $query_MostrarTiendas) or die(mysqli_error($ConexionCotizador));
+$row_MostrarTiendas = mysqli_fetch_assoc($MostrarTiendas);
+$totalRows_MostrarTiendas = mysqli_num_rows($MostrarTiendas);
 ?>
 <?php
 $Activos=0;
@@ -110,8 +174,8 @@ if ((isset($_POST["MM_insert"])) && ($_POST["MM_insert"] == "FormMovil")) {
                        GetSQLValueString($destino, "text"),
                        GetSQLValueString($IDM, "int"));
 
-  	mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
-  $ResultImagen1 = mysql_query($insertSQL, $ConexionCotizador) or die(mysql_error());
+  	mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
+  $ResultImagen1 = mysqli_query($ConexionCotizador, $insertSQL) or die(mysqli_error($ConexionCotizador));
 	if(!$ResultImagen1){  
 		echo '<script type="text/javascript" >
         alert("ERROR EN LA INSERCIÓN DE LA IMAGEN FRONTAL"); //te mostrara el mensaje que quieras
@@ -130,8 +194,8 @@ if(isset($_FILES['Imagen2']['name']) && isset($IDM) && $_FILES['Imagen2']['name'
                        GetSQLValueString($destino, "text"),
                        GetSQLValueString($IDM, "int"));
 
-  	mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
-  $ResultImagen2 = mysql_query($insertSQL, $ConexionCotizador) or die(mysql_error());
+  	mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
+  $ResultImagen2 = mysqli_query($ConexionCotizador, $insertSQL) or die(mysqli_error($ConexionCotizador));
 	if(!$ResultImagen2){  
 		echo '<script type="text/javascript" >
         alert("ERROR EN LA INSERCIÓN DE LA IMAGEN LATERAL IZQUIERDA"); //te mostrara el mensaje que quieras
@@ -150,8 +214,8 @@ if(isset($_FILES['Imagen3']['name']) && isset($IDM) && $_FILES['Imagen3']['name'
                        GetSQLValueString($destino, "text"),
                        GetSQLValueString($IDM, "int"));
 
-  	mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
-  $ResultImagen3 = mysql_query($insertSQL, $ConexionCotizador) or die(mysql_error());
+  	mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
+  $ResultImagen3 = mysqli_query($ConexionCotizador, $insertSQL) or die(mysqli_error($ConexionCotizador));
 	if(!$ResultImagen3){  
 		echo '<script type="text/javascript" >
         alert("ERROR EN LA INSERCIÓN DE LA IMAGEN TRASERA"); //te mostrara el mensaje que quieras
@@ -170,8 +234,8 @@ if(isset($_FILES['Imagen4']['name']) && isset($IDM) && $_FILES['Imagen4']['name'
                        GetSQLValueString($destino, "text"),
                        GetSQLValueString($IDM, "int"));
 
-  	mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
-  $ResultImagen4 = mysql_query($insertSQL, $ConexionCotizador) or die(mysql_error());
+  	mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
+  $ResultImagen4 = mysqli_query($ConexionCotizador, $insertSQL) or die(mysqli_error($ConexionCotizador));
 	if(!$ResultImagen4){  
 		echo '<script type="text/javascript" >
         alert("ERROR EN LA INSERCIÓN DE LA IMAGEN FRONTAL DERECHA"); //te mostrara el mensaje que quieras
@@ -198,8 +262,8 @@ if ((isset($_POST["MM_insert"])) && ($_POST["MM_insert"] == "FormMovil")) {
                        GetSQLValueString($distienda[$i], "int"),
                        GetSQLValueString($enlace[$i], "text"),
                        GetSQLValueString($prclp[$i], "int"));
-  		mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
-  		$ResultTiendas = mysql_query($insertSQL, $ConexionCotizador) or die(mysql_error());	
+  		mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
+  		$ResultTiendas = mysqli_query($ConexionCotizador, $insertSQL) or die(mysqli_error());	
   		if(!$ResultTiendas){
 			$error=1;
 		}
@@ -243,6 +307,7 @@ echo '<script type="text/javascript" >
 <img src="imagenes/logo/logo.PNG" width="140" height="152" style="position:relative; left:45%;"  /></div>  
 </div>
 <div id="cabecera-admin2">
+<span style="float:right; margin-right:15px; "><a href="<?php echo $logoutAction ?>" style="color:#FFF;">Cerrar Sesión</a></span>
 <h3 style="position:relative; top:40%; color:#FFF; font:Arial, Helvetica, sans-serif; font-size:24px; text-align:center;">Administración</h3>
 </div>
 <div id="ZonaCentral">
@@ -270,11 +335,11 @@ do {
 ?>
               <option value="<?php echo $row_MostrarMarcas['ID_MARCA']?>"><?php echo $row_MostrarMarcas['ID_MARCA']?></option>
               <?php
-} while ($row_MostrarMarcas = mysql_fetch_assoc($MostrarMarcas));
-  $rows = mysql_num_rows($MostrarMarcas);
+} while ($row_MostrarMarcas = mysqli_fetch_assoc($MostrarMarcas));
+  $rows = mysqli_num_rows($MostrarMarcas);
   if($rows > 0) {
-      mysql_data_seek($MostrarMarcas, 0);
-	  $row_MostrarMarcas = mysql_fetch_assoc($MostrarMarcas);
+      mysqli_data_seek($MostrarMarcas, 0);
+	  $row_MostrarMarcas = mysqli_fetch_assoc($MostrarMarcas);
   }
 ?>
             </select></td>
@@ -373,7 +438,7 @@ do {
     <input name="Enlace[]" type="text" value="Enlace del producto en la tienda" size="35" maxlength="250" disabled="true"/>
     <br />
     <input name="PrCLP[]" type="text" value="Precio Pesos CH" size="20" maxlength="15" disabled="true" />
-    <br />';$num++;} while ($row_MostrarTiendas = mysql_fetch_assoc($MostrarTiendas)); ?></td>
+    <br />';$num++;} while ($row_MostrarTiendas = mysqli_fetch_assoc($MostrarTiendas)); ?></td>
   </tr>
 
 <tr valign="baseline">
@@ -395,11 +460,11 @@ do {
 </body>
 </html>
 <?php
-mysql_free_result($MostrarMarcas);
+mysqli_free_result($MostrarMarcas);
 
-mysql_free_result($AnadirImagenes);
+mysqli_free_result($AnadirImagenes);
 
-mysql_free_result($MostrarTiendas);
+mysqli_free_result($MostrarTiendas);
 
-mysql_free_result($MostrarMarcas);
+mysqli_free_result($MostrarMarcas);
 ?>

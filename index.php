@@ -1,13 +1,17 @@
 <?php require_once('Connections/ConexionCotizador.php'); ?>
 <?php
+if($ConexionCotizador){
+	echo "Funciona";
+	}
+else{
+	echo "No funciona";
+	}	
 if (!function_exists("GetSQLValueString")) {
-function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "") 
+function GetSQLValueString($theValue, $theType,  $theDefinedValue = "", $theNotDefinedValue = "") 
 {
   if (PHP_VERSION < 6) {
     $theValue = get_magic_quotes_gpc() ? stripslashes($theValue) : $theValue;
   }
-
-  $theValue = function_exists("mysql_real_escape_string") ? mysql_real_escape_string($theValue) : mysql_escape_string($theValue);
 
   switch ($theType) {
     case "text":
@@ -31,17 +35,17 @@ function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDe
 }
 }
 
-mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
+mysqli_select_db($ConexionCotizador,$database_ConexionCotizador);
 $query_MostrarMarcas = "SELECT * FROM marca";
-$MostrarMarcas = mysql_query($query_MostrarMarcas, $ConexionCotizador) or die(mysql_error());
-$row_MostrarMarcas = mysql_fetch_assoc($MostrarMarcas);
-$totalRows_MostrarMarcas = mysql_num_rows($MostrarMarcas);
-
-mysql_select_db($database_ConexionCotizador, $ConexionCotizador);
+$MostrarMarcas = mysqli_query($ConexionCotizador, $query_MostrarMarcas) or die(mysqli_error());
+$row_MostrarMarcas = mysqli_fetch_assoc($MostrarMarcas);
+$totalRows_MostrarMarcas = mysqli_num_rows($MostrarMarcas);
+var_dump($ConexionCotizador);
+mysqli_select_db($ConexionCotizador, $database_ConexionCotizador);
 $query_MostrarTiendas = "SELECT * FROM tienda";
-$MostrarTiendas = mysql_query($query_MostrarTiendas, $ConexionCotizador) or die(mysql_error());
-$row_MostrarTiendas = mysql_fetch_assoc($MostrarTiendas);
-$totalRows_MostrarTiendas = mysql_num_rows($MostrarTiendas);
+$MostrarTiendas = mysqli_query($ConexionCotizador, $query_MostrarTiendas) or die(mysqli_error());
+$row_MostrarTiendas = mysqli_fetch_assoc($MostrarTiendas);
+$totalRows_MostrarTiendas = mysqli_num_rows($MostrarTiendas);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -107,7 +111,7 @@ $totalRows_MostrarTiendas = mysql_num_rows($MostrarTiendas);
                 	      <input name="marca"  type="checkbox" value="<?php echo "'".$row_MostrarMarcas['ID_MARCA']."'"  ?>" /> <?php echo $row_MostrarMarcas['ID_MARCA'];  ?>
               	      </div>
               	    </li>
-                	  <?php } while ($row_MostrarMarcas = mysql_fetch_assoc($MostrarMarcas)); ?>
+                	  <?php } while ($row_MostrarMarcas = mysqli_fetch_assoc($MostrarMarcas)); ?>
                 </ul>
             </li>
             <li class="nivel1">
@@ -121,7 +125,7 @@ $totalRows_MostrarTiendas = mysql_num_rows($MostrarTiendas);
         <input name="tienda"  type="checkbox" value="<?php echo "'".$row_MostrarTiendas['NOMBRE_TIENDA']."'"; ?>" /> <?php echo $row_MostrarTiendas['NOMBRE_TIENDA']; ?>
         </div>
     </li>
-                    <?php } while ($row_MostrarTiendas = mysql_fetch_assoc($MostrarTiendas)); ?>
+                    <?php } while ($row_MostrarTiendas = mysqli_fetch_assoc($MostrarTiendas)); ?>
               </ul>
                     
           </li>                        
@@ -146,7 +150,7 @@ $totalRows_MostrarTiendas = mysql_num_rows($MostrarTiendas);
 </body>
 </html>
 <?php
-mysql_free_result($MostrarMarcas);
+mysqli_free_result($MostrarMarcas);
 
-mysql_free_result($MostrarTiendas);
+mysqli_free_result($MostrarTiendas);
 ?>

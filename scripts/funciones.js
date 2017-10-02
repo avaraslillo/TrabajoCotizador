@@ -56,4 +56,6 @@ function cambiarImagen(ruta){
 	cambioimagen.src=ruta;
 	var cambioEnlace=document.getElementById('ImgEnlace');
 	cambioEnlace.href=ruta;
-}	
+}
+
+	
