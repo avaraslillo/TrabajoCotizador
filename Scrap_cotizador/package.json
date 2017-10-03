@@ -1,0 +1,10 @@
+{
+  "name": "Cotizador-scrape",
+  "description": "scraping de enlaces para obtener precios de celulares.",
+  "main": "server.js",
+  "dependencies": {
+    "cheerio": "latest",
+    "mysql": "latest",
+    "request": "latest"
+  }
+}
