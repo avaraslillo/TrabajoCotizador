@@ -36,7 +36,7 @@ con.query(consulta_enlaces, function(err, resultado) {
             tienda: resultado[index].tienda,
             enlace: resultado[index].enlace
           };
-          console.log(enlace: resultado[index].enlace);
+          console.log(resultado[index].enlace);
           respuestas.push(aux_obj);
           request_completas++;
           if (request_completas == resultado.length) {
