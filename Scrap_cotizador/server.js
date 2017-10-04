@@ -1,6 +1,7 @@
 var cheerio = require('cheerio');
 var request = require('request');
 var mysql = require('mysql');
+var async = require("async");
 var fs = require('fs');
 
 
@@ -12,10 +13,9 @@ var con = mysql.createConnection({
   multipleStatements: true
 });
 
+
 con.connect(function(err) {
   if (err) throw err;
-});
-
 
 var consulta_enlaces = "select relacion_tm.ENLACE_PT as enlace , relacion_tm.ID_MOVIL as id,tienda.NOMBRE_TIENDA as tienda  from cotizadorbd.relacion_tm, cotizadorbd.tienda where relacion_tm.ID_TIENDA = tienda.ID_TIENDA"
 var respuestas = [];
@@ -36,7 +36,7 @@ con.query(consulta_enlaces, function(err, resultado) {
             tienda: resultado[index].tienda,
             enlace: resultado[index].enlace
           };
-          console.log(resultado[index].enlace);
+
           respuestas.push(aux_obj);
           request_completas++;
           if (request_completas == resultado.length) {
@@ -48,6 +48,18 @@ con.query(consulta_enlaces, function(err, resultado) {
                   var $ = cheerio.load(respuestas[index2].html);
                   $(".price.offerPrice.bold").filter(function() {
                     var precio = $(this).text().trim().replace(/\$/, "").replace(/\./, "");
+                    if (!isNaN(precio)) {
+                      con.query('update cotizadorbd.relacion_tm set relacion_tm.PRECIO_CLP = ? WHERE relacion_tm.ENLACE_PT = ? ', [precio, respuestas[index2].enlace])
+                    }
+                  });
+                }
+
+                if (respuestas[index2].tienda === "PC Factory") {
+
+                  var $ = cheerio.load(respuestas[index2].html);
+
+                  $("div.ficha_precio_normal > h2").filter(function() {
+                    var precio = parseInt($(this).html().trim().replace(/\$/, "").replace(/\./, ""));
                     if (!isNaN(precio)) {
                       con.query('update cotizadorbd.relacion_tm set relacion_tm.PRECIO_CLP = ? WHERE relacion_tm.ENLACE_PT = ? ', [precio, respuestas[index2].enlace])
                     }
@@ -100,7 +112,6 @@ con.query(consulta_enlaces, function(err, resultado) {
                       var precio = script[0].match(/\d{1,3}(\.\d{3})+/g);
                       var precio_parse = precio[0].replace(".", "");
                       if (!isNaN(precio_parse)) {
-
                         con.query('update cotizadorbd.relacion_tm set relacion_tm.PRECIO_CLP = ? WHERE relacion_tm.ENLACE_PT = ? ', [precio_parse, respuestas[index2].enlace])
                       }
                     }
@@ -112,15 +123,13 @@ con.query(consulta_enlaces, function(err, resultado) {
               })(index2);
             }
           }
+
         }
       });
     })(index);
 
   }
 
-
 });
 
-
-
-//  else
+});
